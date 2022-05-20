@@ -3,7 +3,6 @@ Type: Package
 Title: Wrapper functions for useful genomic analyses like ChIP-seq or ATAC-seq.
 Version: 0.1.0
 Author: Kevin C.J. Nixon
-Maintainer: kevin.nixon@uhnresearch.ca
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: What license is it under?
