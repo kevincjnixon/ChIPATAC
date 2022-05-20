@@ -1,0 +1,24 @@
+Package: ChIPATAC
+Type: Package
+Title: Wrapper functions for useful genomic analyses like ChIP-seq or ATAC-seq.
+Version: 0.1.0
+Author: Kevin C.J. Nixon
+Maintainer: kevin.nixon@uhnresearch.ca
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports:
+  ChIPseeker,
+  TxDb.Mmusculus.UCSC.mm10.knownGene,
+  TxDb.Hsapiens.UCSC.hg38.knownGene,
+  org.Hs.eg.db,
+  org.Mm.eg.db,
+  BinfTools,
+  ATACseqQC,
+  MotifDb,
+  motifStack,
+  BSgenome.Hsapiens.UCSC.hg38,
+  BSgenome.Mmusculus.UCSC.mm10
+RoxygenNote: 7.1.2
