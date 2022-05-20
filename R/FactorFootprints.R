@@ -20,7 +20,7 @@ library(BSgenome.Mmusculus.UCSC.mm10)
 #' @return GRanges object of bedfile regions
 #' @export
 
-readBed<-function(filename, HOCO=F, species="human", BSg=NULL){
+readBed2<-function(filename, HOCO=F, species="human", BSg=NULL){
   bed<-read.delim(filename, header=F)
   if(isTRUE(HOCO)){
     colnames(bed)<-c("seqnames","start","end","motif","score","strand")
