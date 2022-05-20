@@ -97,3 +97,31 @@ Compare HOMER known motif enrichment results from 2 different analyses
 compHomer(xfile="path/to/x/HOMER/knownResults.txt", yfile="path/to/y/HOMER/knownResults.txt", title="Comparing x and y", xlab="sample x", ylab="sample y", lab=T, spec="CTCF", numLab=5, enrichment=F, returnRes=F)
 ```
 
+### Metagene Plots
+Make customized metagene plots using output from deeptools computeMatrix
+#### First run deeptools computeMatrix:
+```
+#!/bin/bash
+
+computeMatrix scale-regions -S x.bw y.bw -R ROI.bed -b 1000 -a 3000 -o scaled_regions.mat.gz
+
+computeMatrix reference-point -S x.bw y.bw -R ROI.bed -b 3000 -a 3000 -o reference_point.mat.gz
+```
+
+#### Now Make metagene plots
+```
+#Reads in the deeptools matrices and annotates each region to its corresponding gene
+scaledCov<-makeCovList("path/to/scaled_regions.mat.gz", sampleTable=data.frame(sampleName=c("group1","group2"), sampleID=c("x","y")), annoBed=T, species="human")
+referenceCov<-makeCovList("path/to/reference_point.mat.gz", sampleTable=data.frame(sampleName=c("group1","group2"), sampleID=c("x","y")), annoBed=T, sepecies="human")
+
+#Optional: using gene annotations, get one region for each annotated gene, using the region with the strongest signal in the provided control sample
+scaledCov<-addSym(scaledCov, rmZeroes=T, control="group1")
+referenceCov<-addSym(referenceCov, rmZeroes=T, control="group1")
+
+#Now plot the metagene profile:
+plotMetaGene(scaledCov, samples=NULL, subgenes=NULL, title="Metagene Plot", cols=NULL, marks=c("-1000","TSS","TTS","+3000"), xlab="Position (bp)", ylab="Occupancy", pal="Dark2", a=100, b=100, scale=T, retDat=F)
+plotMetaGene(referenceCov, sample=NULL, subgenes=NULL, title="Metagene Plot", cols=NULL, marks=c("-3000","TSS","+3000"), xlab="Position (bp)", ylab="Occupancy", pal="Dark2", a=100, b=300, scale=F, retDat=F)
+
+#There is another function: ChIPATAC:::plotMetaGene2(), which uses the same arguments as above, but, in addition takes an argument 'eb' (must = "sd" or "se") to plot the metagene plot with error (sd=standard deviation, se= standard error)
+```
+
