@@ -252,6 +252,7 @@ scaleMeta<-function(metaList, cols=c(0,100,300,700), b=100, a=100){
 #' @param xlab Character for x-axis label. Default is "Position (bp)"
 #' @param ylab Character for y-axis label. Default is "Occupancy".
 #' @param pal Character indicating RColourBrewer palette name for colour schemes or custom character vector containing either colour names, hexadecimal or rgb() values.
+#' @param lty Numeric indicating the line type for each sample. Default is NULL (lty=1 for each sample - solid line)
 #' @param a numeric indicating the number of columns downstream region (cols[3]-cols[4]) should be scaled down to, if scaling indicated
 #' @param b numeric indicating the number of columns upstream region (cols[1]-cols[2]) should be scaled down to, if scaling indicated
 #' @param scale Boolean indicating if up/downstream regions should be scaled. Default is FALSE. If set to TRUE, must be on computeMatrix output from scale-regions, and cols must be length 4.
@@ -260,7 +261,7 @@ scaleMeta<-function(metaList, cols=c(0,100,300,700), b=100, a=100){
 #' @export
 
 plotMetaGene<-function(metaList, samples=NULL, subgenes=NULL, title="", cols=NULL, marks=c("-500","TSS","TTS","+2000"),
-                       xlab="Position (bp)", ylab="Occupancy", pal="Dark2", a=100, b=100, scale=F, retDat=F){
+                       xlab="Position (bp)", ylab="Occupancy", pal="Dark2", lty=NULL, a=100, b=100, scale=F, retDat=F){
   if(!is.null(samples)){
     message("Subseting to samples:")
     print(samples)
@@ -291,13 +292,22 @@ plotMetaGene<-function(metaList, samples=NULL, subgenes=NULL, title="", cols=NUL
   #print(yrange)
   plot(tmp[[1]], pch=16, col="white", xaxt="n", ylab=ylab, xlab=xlab, main=title, ylim=yrange)
   axis(1, at=cols, labels=marks)
+  if(is.null(lty)){
+    lt=rep(1, length(tmp))
+  } else {
+    lt<-lty
+    if(length(lt)<length(tmp)){
+      message("lty length is less than number of samples, using first value for each...")
+      lt<-rep(lt[1], length(tmp))
+    }
+  }
   for(i in 1:length(tmp)){
-    lines(tmp[[i]][1:length(tmp[[i]])-1], col=BinfTools::colPal(pal)[i], lwd=2)
+    lines(tmp[[i]][1:length(tmp[[i]])-1], col=BinfTools::colPal(pal)[i], lwd=2, lty=lt[i])
   }
   if(length(cols)==4){
     abline(v=cols[c(2,3)], lty=2)
   }
-  legend("topright", legend=names(metaList$cov), col=BinfTools::colPal(pal)[1:length(tmp)], lty=1, lwd=2)
+  legend("topright", legend=names(metaList$cov), col=BinfTools::colPal(pal)[1:length(tmp)], lty=lt, lwd=2)
   if(!is.null(retDat)){
     if(isTRUE(retDat)){
       return(tmp)
