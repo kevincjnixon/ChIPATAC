@@ -384,3 +384,201 @@ plotMetaGene2<-function(metaList, samples=NULL, subgenes=NULL, title="", cols=NU
     }
   }
 
+plotRes<-function(resList, title="test", sub_genes=NULL, col=c("#979796","#001aff"), minp=2e-16, transform=NULL, pc=1, ord=NULL, comp=NULL, yax="Occupancy"){
+  require(dplyr)
+  if(unique(unlist(lapply(resList, class)))=="data.frame"){
+    resList<-lapply(resList, rowMeans, na.rm=T)
+  }
+  res<-do.call("cbind", resList)
+  print(head(res))
+  #res<-log2(as.data.frame(tmp[,c(4,2)]))
+
+  if(!is.null(sub_genes)){
+    res<-res[which(rownames(res) %in% sub_genes),]
+  }
+
+  res<-as.data.frame(res)
+
+  if(!is.null(transform)){
+    if(transform=="log2"){
+      yax<-paste0("log2(",pc,"+",yax,")")
+      res<-log2(pc+res)
+    }
+    if(transform=="log10"){
+      yax<-paste0("log10(",pc,"+",yax,")")
+      res<-log10(pc+res)
+    }
+    if(transform=="zscore"){
+      yax<-paste("z-score",yax)
+      res<-t(scale(t(res)))
+    }
+  }
+
+  res<- as.data.frame(res)
+
+  res<- res %>% tidyr::gather(key="Sample", value="Occupancy")
+
+  res<- as.data.frame(res)
+
+  if(!is.null(ord)){
+    res <- res %>% dplyr::mutate(Sample=forcats::fct_relevel(Sample, ord))
+  }
+  #print(head(res))
+
+  to_remove<-c()
+  for(i in 1:nrow(res)){
+    if(any(is.infinite(res[i,2]))){
+      to_remove<-c(to_remove,i)
+    }
+  }
+  if(length(to_remove)>=1){
+    message("Removing ", length(to_remove)," infinite values from analysis...")
+    res<-res[-to_remove,]
+  }
+
+  pwc<- res %>% rstatix::pairwise_t_test(Occupancy ~ Sample, comparisons = comp)
+  pwc<- res %>% rstatix::pairwise_wilcox_test(Occupancy ~ Sample, comparisons=comp)
+  print(pwc)
+  pwc<- pwc %>% rstatix::add_xy_position(x="Sample")
+
+  if(!is.null(minp)){
+    if(pwc$p.adj[1]<minp){
+      pwc$p.adj[1]<-as.character(minp)
+    }
+  }
+
+  #print(head(res))
+  #return(pwc)
+  p<- ggplot2::ggplot(res) +
+    ggplot2::geom_boxplot(ggplot2::aes(x=Sample, y=Occupancy, fill=Sample), notch=T) +
+    ggplot2::theme_bw() + ggplot2::labs(title=title, y=yax, x="Condition") +
+    ggpubr::stat_pvalue_manual(pwc, label="p.adj") + ggplot2::scale_fill_manual(values=col)
+
+  v<-ggpubr::ggviolin(res, x="Sample",y="Occupancy", fill="Sample") +
+    ggplot2::geom_boxplot(width=0.1, fill="white") +
+    ggpubr::stat_pvalue_manual(pwc, label="p.adj") +
+    ggplot2::labs(title=title,
+                  y=yax, x="Condition") +
+    ggplot2::theme_bw() + ggplot2::scale_fill_manual(values=col)
+
+  print(p)
+  #print(v)
+}
+
+plotResBar<-function(resList, title="test", sub_genes=NULL, col=c("#979796","#001aff"), minp=2e-16, transform=NULL, pc=1, ord=NULL, comp=NULL, yax="Occupancy", eb="sd"){
+  require(dplyr)
+  if(unique(unlist(lapply(resList, class)))=="data.frame"){
+    resList<-lapply(resList, rowMeans, na.rm=T)
+  }
+  res<-do.call("cbind", resList)
+  #print(head(res))
+  #res<-log2(as.data.frame(tmp[,c(4,2)]))
+
+  if(!is.null(sub_genes)){
+    res<-res[which(rownames(res) %in% sub_genes),]
+  }
+
+  res<-as.data.frame(res)
+
+  if(!is.null(transform)){
+    if(transform=="log2"){
+      yax<-paste0("log2(",pc,"+",yax,")")
+      res<-log2(pc+res)
+    }
+    if(transform=="log10"){
+      yax<-paste0("log10(",pc,"+",yax,")")
+      res<-log10(pc+res)
+    }
+    if(transform=="zscore"){
+      yax<-paste("z-score",yax)
+      res<-t(scale(t(res)))
+    }
+  }
+
+  res<- as.data.frame(res)
+
+  res<- res %>% tidyr::gather(key="Sample", value="Occupancy")
+
+  res<- as.data.frame(res)
+  res$Sample<-factor(res$Sample)
+
+  if(!is.null(ord)){
+    res <- res %>% dplyr::mutate(Sample=forcats::fct_relevel(Sample, ord))
+  }
+
+  #print(head(res))
+
+  to_remove<-c()
+  for(i in 1:nrow(res)){
+    if(any(is.infinite(res[i,2]))){
+      to_remove<-c(to_remove,i)
+    }
+  }
+  if(length(to_remove)>=1){
+    message("Removing ", length(to_remove)," infinite values from analysis...")
+    res<-res[-to_remove,]
+  }
+
+  data_sum<-function(data, eb, keepCols=c("Sample"), statCol="Occupancy"){
+    #data is the data table and eb is what we want the error bars to be (sd or se)
+    summary_func<-function(x, col, eb){
+      sum<-NULL
+      if(eb=="sd"){ #If we want sd, calcaulate sd
+        #message("Calculating mean and standard deviation...")
+        sum<-c(mean=mean(as.numeric(x[[col]]), na.rm=TRUE),
+               eb=sd(as.numeric(x[[col]]), na.rm=T))
+      }
+      if(eb=="se"){ #If we want se, calculate se
+        #message("Calculating mean and standard error...")
+        sum<-c(mean=mean(as.numeric(x[[col]]), na.rm=T),
+               eb=(sd(as.numeric(x[[col]]), na.rm=T)/sqrt(length(x[[col]]))))
+      }
+      if(eb==0){ #We don't want any error bars
+        #message("eb=0. Error bars will not be showns...")
+        sum<-c(mean=mean(as.numeric(x[[col]]), na.rm=T),
+               eb=0)
+      }
+      return(sum)
+    }
+    if(eb==0){ #We don't want any error bars
+      message("eb=0. Error bars will not be shown...")
+    }
+    data_sum<-plyr::ddply(data, keepCols, .fun=summary_func, statCol, eb)
+    #data_sum<-rename(data_sum, c("mean"="reads"))
+    #Set NA values for error bars (eb) to 0
+    #data_sum$eb[which(is.na(data_sum$eb))]<-0
+    return(data_sum)
+  }
+
+  x<-data_sum(res, eb)
+  x<-x%>%dplyr::mutate(Sample=forcats::fct_relevel(Sample, names(resList)))
+  if(!is.null(ord)){
+    x<-x%>%dplyr::mutate(Sample=forcats::fct_relevel(Sample, ord))
+  }
+
+  pwc<- res %>% rstatix::pairwise_t_test(Occupancy ~ Sample, comparisons = comp)
+  pwc<- res %>% rstatix::pairwise_wilcox_test(Occupancy ~ Sample, comparisons=comp, p.adjust.method = "BH")
+  pwc<- pwc %>% rstatix::add_xy_position(x="Sample")
+  y.stat<-(max(x$mean)+max(x$eb))*1.1
+  pwc$y.position<-y.stat
+  print(x)
+  print(pwc)
+
+  if(!is.null(minp)){
+    if(pwc$p.adj[1]<minp){
+      pwc$p.adj[1]<-as.character(minp)
+    }
+  }
+
+  #print(head(res))
+  #return(pwc)
+  p<- ggplot2::ggplot(x, ggplot2::aes(x=Sample, y=mean, fill=Sample)) +
+    ggplot2::geom_bar(stat="identity", colour="black", position=ggplot2::position_dodge()) +
+    ggplot2::geom_errorbar(ggplot2::aes(ymin=mean-eb, ymax=mean+eb), width=.2, position=ggplot2::position_dodge(0.9))+
+    ggplot2::theme_bw() + ggplot2::labs(title=title, y=yax, x="Condition") +
+    ggpubr::stat_pvalue_manual(pwc, label="p.adj.signif", inherit.aes=F, step.increase = 0.1) + ggplot2::scale_fill_manual(values=colPal(col))
+
+
+  print(p)
+  #print(v)
+}
