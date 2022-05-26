@@ -14,6 +14,7 @@ plotMetaGene(
   xlab = "Position (bp)",
   ylab = "Occupancy",
   pal = "Dark2",
+  lty = NULL,
   a = 100,
   b = 100,
   scale = F,
@@ -38,6 +39,8 @@ plotMetaGene(
 \item{ylab}{Character for y-axis label. Default is "Occupancy".}
 
 \item{pal}{Character indicating RColourBrewer palette name for colour schemes or custom character vector containing either colour names, hexadecimal or rgb() values.}
+
+\item{lty}{Numeric indicating the line type for each sample. Default is NULL (lty=1 for each sample - solid line)}
 
 \item{a}{numeric indicating the number of columns downstream region (cols[3]-cols[4]) should be scaled down to, if scaling indicated}
 
