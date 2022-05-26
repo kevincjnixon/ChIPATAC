@@ -9,11 +9,13 @@
 #'@param bedfile Character indicating the path to the bed region files used in computeMatrix (can be left 'NULL' to use regions in .mat.gz file). MUST be same order as .mat.gz regions
 #'@param sampleTable data.frame with two columns: sampleName and sampleID. sampleName contains the name that will appear for each sample in the figure. SampleID contains a pattern denoting each unique sample (can be the same as sampleName). NOTE: samples must be the same order as that of bigwigs input into computeMatrix.
 #'@param annobed Boolean indicating if bed file should be annotated to include transcript IDs (default=FALSE)
-#'@param species Character indicating species if annobed=T. Must be "human" or "mouse" at the moment.
+#'@param species Character indicating species if annobed=T. Must be "human" or "mouse". Can set to "other" but TxDb object and annoDb must be provided.
+#'@param TxDb TxDb object. Used if species="other", otherwise, "TxDb.Hsapiens.UCSC.hg38.knownGene" or "TxDb.Mmusculus.UCSC.mm10.knownGene" are used.
+#'@param db Annotation database (as character) to use if species="other", otherwise "org.Hs.eg.db" or "org.Mm.eg.db" are used - must have corresponding bioconductor package installed.
 #'@return list of length 3: covList containing list of coverage matrices, bed containing regions for each row of the coverage matrices, and cols: a numeric vector of length 4 providing the suggested column parameters for plotMetaGene() and subsetquent functions. Use only when computeMatrix was executed with 'scale-regions' and NOT 'reference-point'
 #'@export
 
-makeCovList<-function(matfile, header=3, bedfile=NULL, sampleTable, annobed=F, species="human"){
+makeCovList<-function(matfile, header=3, bedfile=NULL, sampleTable, annobed=F, species="human", TxDb=NULL, db=NULL){
   #matfile = .mat.gz file from deeptools computeMatrix output
   #bedfile = .bed file used to define regions for computeMatrix
   #sampleTable = dataframe with two columns: sampleName and sampleID
@@ -46,6 +48,9 @@ makeCovList<-function(matfile, header=3, bedfile=NULL, sampleTable, annobed=F, s
       require(org.Mm.eg.db, quietly = T)
       TxDb<-TxDb.Mmusculus.UCSC.mm10.knownGene::TxDb.Mmusculus.UCSC.mm10.knownGene
       db<-"org.Mm.eg.db"
+    }
+    if(species=="other"){
+      message("Species set to other. Be sure to have TxDb and db set to correct organism.")
     }
     message("Annotating bedfile")
     if(is.null(bedfile)){
@@ -580,5 +585,4 @@ plotResBar<-function(resList, title="test", sub_genes=NULL, col=c("#979796","#00
 
 
   print(p)
-  #print(v)
 }
