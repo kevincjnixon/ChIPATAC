@@ -10,7 +10,9 @@ makeCovList(
   bedfile = NULL,
   sampleTable,
   annobed = F,
-  species = "human"
+  species = "human",
+  TxDb = NULL,
+  db = NULL
 )
 }
 \arguments{
@@ -24,7 +26,11 @@ makeCovList(
 
 \item{annobed}{Boolean indicating if bed file should be annotated to include transcript IDs (default=FALSE)}
 
-\item{species}{Character indicating species if annobed=T. Must be "human" or "mouse" at the moment.}
+\item{species}{Character indicating species if annobed=T. Must be "human" or "mouse". Can set to "other" but TxDb object and annoDb must be provided.}
+
+\item{TxDb}{TxDb object. Used if species="other", otherwise, "TxDb.Hsapiens.UCSC.hg38.knownGene" or "TxDb.Mmusculus.UCSC.mm10.knownGene" are used.}
+
+\item{db}{Annotation database (as character) to use if species="other", otherwise "org.Hs.eg.db" or "org.Mm.eg.db" are used - must have corresponding bioconductor package installed.}
 }
 \value{
 list of length 3: covList containing list of coverage matrices, bed containing regions for each row of the coverage matrices, and cols: a numeric vector of length 4 providing the suggested column parameters for plotMetaGene() and subsetquent functions. Use only when computeMatrix was executed with 'scale-regions' and NOT 'reference-point'
