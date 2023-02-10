@@ -261,12 +261,13 @@ scaleMeta<-function(metaList, cols=c(0,100,300,700), b=100, a=100){
 #' @param a numeric indicating the number of columns downstream region (cols[3]-cols[4]) should be scaled down to, if scaling indicated
 #' @param b numeric indicating the number of columns upstream region (cols[1]-cols[2]) should be scaled down to, if scaling indicated
 #' @param scale Boolean indicating if up/downstream regions should be scaled. Default is FALSE. If set to TRUE, must be on computeMatrix output from scale-regions, and cols must be length 4.
+#' @param ylim Numeric vector of length 2 indicating min,max of y axis, respectively. Default is NULL for auto determination of limits.
 #' @param retDat Indicating which type of data should be returned. Default NULL returns no data. Logical TRUE returns data for a metagene plot. "box" returns data for boxplots of coverage.
 #' @return Custom metagene figure
 #' @export
 
 plotMetaGene<-function(metaList, samples=NULL, subgenes=NULL, title="", cols=NULL, marks=c("-500","TSS","TTS","+2000"),
-                       xlab="Position (bp)", ylab="Occupancy", pal="Dark2", lty=NULL, a=100, b=100, scale=F, retDat=F){
+                       xlab="Position (bp)", ylab="Occupancy", pal="Dark2", lty=NULL, a=100, b=100, scale=F, ylim=NULL, retDat=F){
   if(!is.null(samples)){
     message("Subseting to samples:")
     print(samples)
@@ -293,7 +294,11 @@ plotMetaGene<-function(metaList, samples=NULL, subgenes=NULL, title="", cols=NUL
   newrange<-function(x){
     range(x[is.finite(x)])
   }
-  yrange<-newrange(unlist(tmp)[-c(length(tmp[[1]]),length(tmp[[1]])*length(tmp))])
+  if(is.null(ylim)){
+    yrange<-newrange(unlist(tmp)[-c(length(tmp[[1]]),length(tmp[[1]])*length(tmp))])
+  } else {
+    yrange<-ylim
+  }
   #print(yrange)
   plot(tmp[[1]], pch=16, col="white", xaxt="n", ylab=ylab, xlab=xlab, main=title, ylim=yrange)
   axis(1, at=cols, labels=marks)
