@@ -305,7 +305,7 @@ plotMetaGene<-function(metaList, samples=NULL, subgenes=NULL, title="", cols=NUL
     plot(tmp[[1]], pch=16, col="white", xaxt="n", ylab=ylab, xlab=xlab, main=title, ylim=yrange)
   } else {
     plot(tmp[[1]], pch=16, col="white", xaxt="n", yaxt="n", ylab=ylab, xlab=xlab, main=title, ylim=yrange)
-    axis(2, at=ytick))
+    axis(2, at=ytick)
   }
   axis(1, at=cols, labels=marks)
   if(is.null(lty)){
