@@ -18,8 +18,6 @@ plotMetaGene(
   a = 100,
   b = 100,
   scale = F,
-  ylim = NULL,
-  ytick = NULL,
   retDat = F
 )
 }
@@ -49,10 +47,6 @@ plotMetaGene(
 \item{b}{numeric indicating the number of columns upstream region (cols[1]-cols[2]) should be scaled down to, if scaling indicated}
 
 \item{scale}{Boolean indicating if up/downstream regions should be scaled. Default is FALSE. If set to TRUE, must be on computeMatrix output from scale-regions, and cols must be length 4.}
-                                                                              
-\item{ylim}{Numeric vector of length 2 indicating min,max of y axis, respectively. Default is NULL for auto determination of limits.}                                                                     
-                                                                              
-\item{ytick}{Numeric vector indicating y-axis ticks. Leave NULL for default.}                                                                         
 
 \item{retDat}{Indicating which type of data should be returned. Default NULL returns no data. Logical TRUE returns data for a metagene plot. "box" returns data for boxplots of coverage.}
 }

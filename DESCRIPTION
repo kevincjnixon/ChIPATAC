@@ -19,5 +19,6 @@ Imports:
   MotifDb,
   motifStack,
   BSgenome.Hsapiens.UCSC.hg38,
-  BSgenome.Mmusculus.UCSC.mm10
-RoxygenNote: 7.1.2
+  BSgenome.Mmusculus.UCSC.mm10,
+  ComplexHeatmap
+RoxygenNote: 7.2.3
